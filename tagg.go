@@ -8,12 +8,6 @@ import (
 
 var TaggSignature uint32 = 0x54414747
 
-type Tagg struct {
-	Name   [4]byte
-	Length uint32
-	Data   []byte
-}
-
 const (
 	Tagg_AVGC uint32 = 0x41564743
 	Tagg_MAXC uint32 = 0x4d415843
@@ -35,7 +29,7 @@ type TaggOFFS struct {
 	Offsets [16]uint32
 }
 
-func decodeTaggAVGC(in io.Reader) (*TaggAVGC, error) {
+func DecodeTaggAVGC(in io.Reader) (*TaggAVGC, error) {
 	var length uint32
 	err := binary.Read(in, binary.LittleEndian, &length)
 	if err != nil {
@@ -50,7 +44,7 @@ func decodeTaggAVGC(in io.Reader) (*TaggAVGC, error) {
 	return &avgc, err
 }
 
-func decodeTaggMAXC(in io.Reader) (*TaggMAXC, error) {
+func DecodeTaggMAXC(in io.Reader) (*TaggMAXC, error) {
 	var length uint32
 	err := binary.Read(in, binary.LittleEndian, &length)
 	if err != nil {
@@ -65,7 +59,7 @@ func decodeTaggMAXC(in io.Reader) (*TaggMAXC, error) {
 	return &maxc, err
 }
 
-func decodeTaggOFFS(in io.Reader) (*TaggOFFS, error) {
+func DecodeTaggOFFS(in io.Reader) (*TaggOFFS, error) {
 	var length uint32
 	err := binary.Read(in, binary.LittleEndian, &length)
 	if err != nil {

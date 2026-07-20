@@ -7,10 +7,22 @@ import (
 )
 
 type PAA struct {
-	Type TypeOfPaX
-	AVGC *TaggAVGC
-	MAXC *TaggMAXC
-	OFFS *TaggOFFS
+	Type    TypeOfPaX
+	AVGC    *TaggAVGC
+	MAXC    *TaggMAXC
+	OFFS    *TaggOFFS
+	Mipmaps []Mipmap
+}
+
+type mipmapHeader struct {
+	Width  uint16
+	Height uint16
+}
+
+type Mipmap struct {
+	mipmapHeader
+	Data       []byte
+	Compressed bool
 }
 
 func Decode(in io.Reader) (*PAA, error) {
@@ -61,14 +73,24 @@ func Decode(in io.Reader) (*PAA, error) {
 	}
 
 	for {
-		// read first 4 bytes
-		err = binary.Read(in, binary.LittleEndian, &ulong)
+		// read first 2 bytes
+		err = binary.Read(in, binary.LittleEndian, &ushort)
 		if err != nil {
 			return nil, err
 		}
 
-		if ulong != TaggSignature {
+		if ushort != 0x4747 {
+			// not a tag, move on to palette
 			break
+		}
+
+		err = binary.Read(in, binary.LittleEndian, &ushort)
+		if err != nil {
+			return nil, err
+		}
+		if ushort != 0x5441 {
+			// not a tagg? something is very wrong
+			return nil, fmt.Errorf("error: expected remainder of TAGG signature, got: %#x", ushort)
 		}
 
 		err = readAndDecodeTagg(img, in)
@@ -76,6 +98,46 @@ func Decode(in io.Reader) (*PAA, error) {
 			return nil, err
 		}
 	}
+
+	// palette
+	if ushort != 0 {
+		return nil, fmt.Errorf("error: paletted images not supported (yet)")
+	}
+
+	// mipmaps
+	var mmHeader mipmapHeader
+
+	err = binary.Read(in, binary.LittleEndian, &mmHeader)
+	if err != nil {
+		return nil, err
+	}
+
+	var mmCompressed bool = mmHeader.Width&0x8000 == 0x8000
+	if mmCompressed {
+		mmHeader.Width = mmHeader.Width & 0x7FFF
+	}
+
+	if mmHeader.Width == 1234 && mmHeader.Height == 8765 {
+		return nil, fmt.Errorf("error: paletted images not supported (yet)")
+	}
+
+	// size is a 24 bit unsigned
+	mmSizeBytes := make([]uint8, 3)
+	_, err = in.Read(mmSizeBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	mmSize := uint32(mmSizeBytes[0]) | uint32(mmSizeBytes[1])<<8 | uint32(mmSizeBytes[2])<<16
+
+	var mmData []byte = make([]byte, mmSize)
+
+	_, err = in.Read(mmData)
+	if err != nil {
+		return nil, err
+	}
+
+	img.Mipmaps = append(img.Mipmaps, Mipmap{mmHeader, mmData, mmCompressed})
 
 	return img, nil
 }
@@ -89,11 +151,11 @@ func readAndDecodeTagg(img *PAA, in io.Reader) error {
 
 	switch ulong {
 	case Tagg_AVGC:
-		img.AVGC, err = decodeTaggAVGC(in)
+		img.AVGC, err = DecodeTaggAVGC(in)
 	case Tagg_MAXC:
-		img.MAXC, err = decodeTaggMAXC(in)
+		img.MAXC, err = DecodeTaggMAXC(in)
 	case Tagg_OFFS:
-		img.OFFS, err = decodeTaggOFFS(in)
+		img.OFFS, err = DecodeTaggOFFS(in)
 	default:
 		return fmt.Errorf("unknown TAGG: %#x", ulong)
 	}
