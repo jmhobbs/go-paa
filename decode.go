@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"log"
 )
 
 type PAA struct {
@@ -61,6 +60,23 @@ func Decode(in io.Reader) (*PAA, error) {
 		}
 	}
 
+	for {
+		// read first 4 bytes
+		err = binary.Read(in, binary.LittleEndian, &ulong)
+		if err != nil {
+			return nil, err
+		}
+
+		if ulong != TaggSignature {
+			break
+		}
+
+		err = readAndDecodeTagg(img, in)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return img, nil
 }
 
@@ -70,8 +86,6 @@ func readAndDecodeTagg(img *PAA, in io.Reader) error {
 	if err != nil {
 		return err
 	}
-
-	log.Printf("data length: %d", ulong)
 
 	switch ulong {
 	case Tagg_AVGC:

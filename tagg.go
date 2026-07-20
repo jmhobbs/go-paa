@@ -2,12 +2,11 @@ package paa
 
 import (
 	"encoding/binary"
-	"errors"
 	"fmt"
 	"io"
 )
 
-var TaggSignature uint32 = 0x47474154
+var TaggSignature uint32 = 0x54414747
 
 type Tagg struct {
 	Name   [4]byte
@@ -29,12 +28,10 @@ type TaggAVGC struct {
 }
 
 type TaggMAXC struct {
-	Length uint32
-	Data   [4]byte
+	Data [4]uint8
 }
 
 type TaggOFFS struct {
-	Length  uint32
 	Offsets [16]uint32
 }
 
@@ -54,9 +51,31 @@ func decodeTaggAVGC(in io.Reader) (*TaggAVGC, error) {
 }
 
 func decodeTaggMAXC(in io.Reader) (*TaggMAXC, error) {
-	return nil, errors.New("not implemented")
+	var length uint32
+	err := binary.Read(in, binary.LittleEndian, &length)
+	if err != nil {
+		return nil, err
+	}
+	if length != 4 {
+		return nil, fmt.Errorf("error: unexpected length for MAXC tag: %d", length)
+	}
 
+	var maxc TaggMAXC
+	err = binary.Read(in, binary.LittleEndian, &maxc)
+	return &maxc, err
 }
+
 func decodeTaggOFFS(in io.Reader) (*TaggOFFS, error) {
-	return nil, errors.New("not implemented")
+	var length uint32
+	err := binary.Read(in, binary.LittleEndian, &length)
+	if err != nil {
+		return nil, err
+	}
+	if length != 64 {
+		return nil, fmt.Errorf("error: unexpected length for OFFS tag: %d", length)
+	}
+
+	var offs TaggOFFS
+	err = binary.Read(in, binary.LittleEndian, &offs)
+	return &offs, err
 }
