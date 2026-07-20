@@ -1,6 +1,7 @@
 package paa_test
 
 import (
+	"io"
 	"os"
 	"testing"
 
@@ -54,4 +55,10 @@ func Test_Decode_DX1_TestFile(t *testing.T) {
 	assert.True(t, img.Mipmaps[0].Compressed)
 	assert.Equal(t, 512, int(img.Mipmaps[0].Width))
 	assert.Equal(t, 256, int(img.Mipmaps[0].Height))
+
+	r, err := img.Mipmaps[0].Reader()
+	require.NoError(t, err)
+	bytes, err := io.ReadAll(r)
+	require.NoError(t, err)
+	assert.Equal(t, 65536, len(bytes)) // 512x256x4 (RGBA)
 }
