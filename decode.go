@@ -112,7 +112,7 @@ func Decode(in io.Reader) (*PAA, error) {
 		return nil, err
 	}
 
-	var mmCompressed bool = mmHeader.Width&0x8000 == 0x8000
+	var mmCompressed = mmHeader.Width&0x8000 == 0x8000
 	if mmCompressed {
 		mmHeader.Width = mmHeader.Width & 0x7FFF
 	}
@@ -130,7 +130,7 @@ func Decode(in io.Reader) (*PAA, error) {
 
 	mmSize := uint32(mmSizeBytes[0]) | uint32(mmSizeBytes[1])<<8 | uint32(mmSizeBytes[2])<<16
 
-	var mmData []byte = make([]byte, mmSize)
+	var mmData = make([]byte, mmSize)
 
 	_, err = in.Read(mmData)
 	if err != nil {

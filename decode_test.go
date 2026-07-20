@@ -15,7 +15,11 @@ func Test_Decode_DX1_TestFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			t.Logf("failed to close test file: %v", err)
+		}
+	}()
 
 	img, err := paa.Decode(f)
 	require.NoError(t, err)
