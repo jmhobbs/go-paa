@@ -1,12 +1,9 @@
 package paa
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
-
-	"github.com/anchore/go-lzo"
 )
 
 type PAA struct {
@@ -15,24 +12,6 @@ type PAA struct {
 	MAXC    *TaggMAXC
 	OFFS    *TaggOFFS
 	Mipmaps []Mipmap
-}
-
-type mipmapHeader struct {
-	Width  uint16
-	Height uint16
-}
-
-type Mipmap struct {
-	mipmapHeader
-	Data       []byte
-	Compressed bool
-}
-
-func (m *Mipmap) Reader() (io.Reader, error) {
-	if !m.Compressed {
-		return bytes.NewReader(m.Data), nil
-	}
-	return lzo.NewReader(bytes.NewReader(m.Data)), nil
 }
 
 func Decode(in io.Reader) (*PAA, error) {
@@ -147,7 +126,7 @@ func Decode(in io.Reader) (*PAA, error) {
 		return nil, err
 	}
 
-	img.Mipmaps = append(img.Mipmaps, Mipmap{mmHeader, mmData, mmCompressed})
+	img.Mipmaps = append(img.Mipmaps, Mipmap{mmHeader, mmData, mmCompressed, img.Type})
 
 	return img, nil
 }

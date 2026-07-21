@@ -14,3 +14,16 @@ const (
 	Type_RGBA8 TypeOfPaX = 0x8888
 	Type_Gray  TypeOfPaX = 0x8080
 )
+
+var TypeOfPaXStrings = map[TypeOfPaX]string{
+	Type_OFP:   "OFP",
+	Type_DXT1:  "DXT1",
+	Type_DXT2:  "DXT2",
+	Type_DXT3:  "DXT3",
+	Type_DXT4:  "DXT4",
+	Type_DXT5:  "DXT5",
+	Type_RGBA4: "RGBA4",
+	Type_RGBA5: "RGBA5",
+	Type_RGBA8: "RGBA8",
+	Type_Gray:  "Gray",
+}
