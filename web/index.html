@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DayZ PAA to PNG</title>
+  </head>
+  <body>
+    <h1>DayZ PAA to PNG Converter</h1>
+    <p>Convert DayZ PAA files to PNG format easily.</p>
+    <input type="file" id="fileInput" accept=".paa">
+    <div id="status"></div>
+    <img id="outputImage" alt="Converted PNG will appear here" style="display:none; margin-top: 20px; max-width: 100%;">
+    <script src="wasm_exec.js"></script>
+    <script>
+      const fileInput = document.getElementById('fileInput');
+      const statusDiv = document.getElementById('status');
+      const outputImage = document.getElementById('outputImage');
+
+      const go = new Go();
+
+      WebAssembly.instantiateStreaming(fetch('paa.wasm'), go.importObject)
+        .then((result) => {
+          go.run(result.instance).catch((err) => {
+           statusDiv.innerText = 'error: ' + err;
+          });
+
+          fileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            statusDiv.textContent = 'Converting...';
+            outputImage.style.display = 'none';
+
+            try {
+              const result = paaToPng(new Uint8Array(await file.arrayBuffer()));
+
+              if (!result.ok) {
+                statusDiv.innerText = 'Conversion failed: ' + result.error;
+                return;
+              }
+
+              const blob = new Blob([result.png], { type: 'image/png' });
+              const url = URL.createObjectURL(blob);
+              outputImage.src = url;
+              outputImage.style.display = 'block';
+              statusDiv.textContent = 'Conversion complete!';
+            } catch (error) {
+              statusDiv.textContent = `Error: ${error.message}`;
+            }
+          });
+        })
+        .catch((err) => {
+         statusDiv.innerText = 'failed to load paa.wasm: ' + err;
+        });
+    </script>
+  </body>
+</html>
