@@ -1,0 +1,12 @@
+version: "2"
+
+linters:
+  exclusions:
+    rules:
+      - path: _test\.go
+        # Disable some linters for test files
+        linters:
+          - errcheck
+          - forcetypeassert
+          - goconst
+          - cyclop

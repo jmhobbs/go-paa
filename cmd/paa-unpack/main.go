@@ -28,7 +28,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, "error: failed to open input file:", err)
 		os.Exit(1)
 	}
-	defer in.Close()
+	defer func() {
+		if err := in.Close(); err != nil {
+			fmt.Fprintln(os.Stderr, "error: failed to close input file:", err)
+		}
+	}()
 
 	paaImg, err := paa.Decode(in)
 	if err != nil {
@@ -51,7 +55,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, "error: failed to open output file:", err)
 		os.Exit(1)
 	}
-	defer sink.Close()
+	defer func() {
+		if err := sink.Close(); err != nil {
+			fmt.Fprintln(os.Stderr, "error: failed to close output file:", err)
+		}
+	}()
 
 	err = png.Encode(sink, rgba)
 	if err != nil {
