@@ -56,18 +56,49 @@ func Test_Decode_DX1_TestFile(t *testing.T) {
 		img.OFFS.Offsets,
 	)
 
-	require.Equal(t, 1, len(img.Mipmaps))
+	require.Equal(t, 8, len(img.Mipmaps))
 	assert.True(t, img.Mipmaps[0].Compressed)
 	assert.Equal(t, 512, int(img.Mipmaps[0].Width))
 	assert.Equal(t, 256, int(img.Mipmaps[0].Height))
 
-	r, err := img.Mipmaps[0].Reader()
+	assert.True(t, img.Mipmaps[1].Compressed)
+	assert.Equal(t, 256, int(img.Mipmaps[1].Width))
+	assert.Equal(t, 128, int(img.Mipmaps[1].Height))
+
+	assert.False(t, img.Mipmaps[2].Compressed)
+	assert.Equal(t, 128, int(img.Mipmaps[2].Width))
+	assert.Equal(t, 64, int(img.Mipmaps[2].Height))
+
+	assert.False(t, img.Mipmaps[3].Compressed)
+	assert.Equal(t, 64, int(img.Mipmaps[3].Width))
+	assert.Equal(t, 32, int(img.Mipmaps[3].Height))
+
+	assert.False(t, img.Mipmaps[4].Compressed)
+	assert.Equal(t, 32, int(img.Mipmaps[4].Width))
+	assert.Equal(t, 16, int(img.Mipmaps[4].Height))
+
+	assert.False(t, img.Mipmaps[5].Compressed)
+	assert.Equal(t, 16, int(img.Mipmaps[5].Width))
+	assert.Equal(t, 8, int(img.Mipmaps[5].Height))
+
+	assert.False(t, img.Mipmaps[6].Compressed)
+	assert.Equal(t, 8, int(img.Mipmaps[6].Width))
+	assert.Equal(t, 4, int(img.Mipmaps[6].Height))
+
+	// Why is this one 0x0?
+	assert.False(t, img.Mipmaps[7].Compressed)
+	assert.Equal(t, 0, int(img.Mipmaps[7].Width))
+	assert.Equal(t, 0, int(img.Mipmaps[7].Height))
+
+	t.Logf("size: %d, offset: %d", img.Mipmaps[0].Size, img.Mipmaps[0].Offset)
+
+	r, err := img.Mipmaps[0].Reader(f)
 	require.NoError(t, err)
 	bytes, err := io.ReadAll(r)
 	require.NoError(t, err)
 	assert.Equal(t, 65536, len(bytes)) // 512x256/2 (DXT1 - 1 nibble per pixel)
 
-	rgba, err := img.Mipmaps[0].Image()
+	rgba, err := img.Mipmaps[0].Image(f)
 	require.NoError(t, err)
 	assert.Equal(t, image.Rectangle{Max: image.Pt(512, 256)}, rgba.Bounds())
 	assert.Equal(t, 512*4, rgba.Stride)

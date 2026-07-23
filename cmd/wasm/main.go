@@ -26,12 +26,14 @@ func paaToPng(_ js.Value, args []js.Value) (result any) {
 	data := make([]byte, args[0].Get("length").Int())
 	js.CopyBytesToGo(data, args[0])
 
-	paaFile, err := paa.Decode(bytes.NewReader(data))
+	src := bytes.NewReader(data)
+
+	paaFile, err := paa.Decode(src)
 	if err != nil {
 		return errorResult(fmt.Sprintf("failed to decode PAA file: %v", err))
 	}
 
-	img, err := paaFile.Mipmaps[0].Image()
+	img, err := paaFile.Mipmaps[0].Image(src)
 	if err != nil {
 		return errorResult(fmt.Sprintf("failed to decode mipmap image: %v", err))
 	}

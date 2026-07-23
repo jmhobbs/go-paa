@@ -6,7 +6,7 @@
 
 A (WIP) Go library for working with PAA files from Bohemia Interactive.
 
-Currently, it can only read DXT1 format PAA files.
+Currently, it can only read DXT1, DXT3 and DXT5 format PAA files.
 
 ## Usage
 

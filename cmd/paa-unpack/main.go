@@ -40,7 +40,7 @@ func main() {
 		*outputFilename = strings.TrimSuffix(flag.Arg(0), ".paa") + ".png"
 	}
 
-	rgba, err := paaImg.Mipmaps[0].Image()
+	rgba, err := paaImg.Mipmaps[0].Image(in)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error: failed to decode mipmap image:", err)
 		os.Exit(1)
