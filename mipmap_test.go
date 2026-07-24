@@ -1,14 +1,32 @@
 package paa_test
 
 import (
+	"image"
+	"image/png"
 	"os"
 	"testing"
 
 	"github.com/jmhobbs/go-paa"
+	"github.com/jmhobbs/go-psnr"
 	"github.com/stretchr/testify/require"
 )
 
 func Test_Mipmap_Image(t *testing.T) {
+	expected, err := func() (image.Image, error) {
+		f, err := os.Open("testdata/test-pattern.png")
+		if err != nil {
+			return nil, err
+		}
+		defer func() {
+			if err := f.Close(); err != nil {
+				t.Logf("failed to close test input file: %v", err)
+			}
+		}()
+
+		return png.Decode(f)
+	}()
+	require.NoError(t, err)
+
 	formats := []struct {
 		Name string
 		Type paa.TypeOfPaX
@@ -43,8 +61,13 @@ func Test_Mipmap_Image(t *testing.T) {
 				Offset:     0,
 			}
 
-			_, err = m.Image(f)
+			rgba, err := m.Image(f)
 			require.NoError(t, err)
+
+			db, err := psnr.Image(expected, rgba)
+			require.NoError(t, err)
+
+			require.Greater(t, db, 30.0, "PSNR should be greater than 30 dB for %s", format.Name)
 		})
 	}
 }
