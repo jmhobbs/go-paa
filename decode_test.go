@@ -109,5 +109,5 @@ func Test_Decode_DX1_TestFile(t *testing.T) {
 
 	db, err := psnr.Image(expected, rgba)
 	require.NoError(t, err)
-	assert.Greater(t, db, 30.0, "PSNR should be greater than 30dB")
+	assert.Greater(t, db, 40.0, "PSNR should be greater than 40dB")
 }

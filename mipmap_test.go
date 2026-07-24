@@ -67,7 +67,7 @@ func Test_Mipmap_Image(t *testing.T) {
 			db, err := psnr.Image(expected, rgba)
 			require.NoError(t, err)
 
-			require.Greater(t, db, 30.0, "PSNR should be greater than 30 dB for %s", format.Name)
+			require.Greater(t, db, 40.0, "PSNR should be greater than 40dB for %s", format.Name)
 		})
 	}
 }
