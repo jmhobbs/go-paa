@@ -2,6 +2,7 @@ package paa_test
 
 import (
 	"bytes"
+	"io"
 	"testing"
 
 	"github.com/jmhobbs/go-paa"
@@ -38,6 +39,43 @@ func Test_DecodeTaggMAXC(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, maxc)
 	assert.Equal(t, [4]uint8{0xff, 0xff, 0xff, 0xff}, maxc.Data)
+}
+
+func Test_DecodeTagg_LengthReadError(t *testing.T) {
+	decoders := map[string]func(io.Reader) (any, error){
+		"AVGC": func(r io.Reader) (any, error) { return paa.DecodeTaggAVGC(r) },
+		"MAXC": func(r io.Reader) (any, error) { return paa.DecodeTaggMAXC(r) },
+		"OFFS": func(r io.Reader) (any, error) { return paa.DecodeTaggOFFS(r) },
+	}
+
+	for name, decode := range decoders {
+		t.Run(name, func(t *testing.T) {
+			// Empty reader: even the 4 byte length prefix can't be read.
+			_, err := decode(bytes.NewReader(nil))
+			require.Error(t, err)
+		})
+	}
+}
+
+func Test_DecodeTagg_LengthMismatch(t *testing.T) {
+	cases := []struct {
+		name   string
+		decode func(io.Reader) (any, error)
+	}{
+		{"AVGC", func(r io.Reader) (any, error) { return paa.DecodeTaggAVGC(r) }},
+		{"MAXC", func(r io.Reader) (any, error) { return paa.DecodeTaggMAXC(r) }},
+		{"OFFS", func(r io.Reader) (any, error) { return paa.DecodeTaggOFFS(r) }},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			src := bytes.NewReader([]byte{0x01, 0x00, 0x00, 0x00}) // Length: 1, wrong for all three tags
+			result, err := c.decode(src)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), "unexpected length")
+			assert.Nil(t, result)
+		})
+	}
 }
 
 func Test_DecodeTaggOFFS(t *testing.T) {
