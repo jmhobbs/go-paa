@@ -38,7 +38,7 @@ func (m *Mipmap) Reader(src io.ReadSeeker) (io.Reader, error) {
 	return lzo.NewReader(&reader), nil
 }
 
-func (m *Mipmap) Image(src io.ReadSeeker) (*image.RGBA, error) {
+func (m *Mipmap) Image(src io.ReadSeeker) (*image.NRGBA, error) {
 	var (
 		rgbaBytes []byte
 		err       error
@@ -68,7 +68,7 @@ func (m *Mipmap) Image(src io.ReadSeeker) (*image.RGBA, error) {
 		return nil, err
 	}
 
-	rgba := image.NewRGBA(image.Rect(0, 0, int(m.Width), int(m.Height)))
+	rgba := image.NewNRGBA(image.Rect(0, 0, int(m.Width), int(m.Height)))
 	rgba.Pix = rgbaBytes
 
 	return rgba, nil
