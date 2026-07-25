@@ -23,11 +23,22 @@ $ paa-unpack -h
 usage: paa-unpack [options] <input-file>
 
 options:
+  -all
+        unpack all mipmaps (default: false)
   -output string
         output filename (default: <input-file>.png)
 
 $ paa-unpack testdata/test-pattern.paa
-Converted testdata/test-pattern.paa to testdata/test-pattern.png
+Wrote testdata/test-pattern.png
+
+$ paa-unpack -all testdata/test-pattern.paa
+Wrote testdata/test-pattern_(512x256).png
+Wrote testdata/test-pattern_(256x128).png
+Wrote testdata/test-pattern_(128x64).png
+Wrote testdata/test-pattern_(64x32).png
+Wrote testdata/test-pattern_(32x16).png
+Wrote testdata/test-pattern_(16x8).png
+Wrote testdata/test-pattern_(8x4).png
 ```
 
 ### paa-inspect

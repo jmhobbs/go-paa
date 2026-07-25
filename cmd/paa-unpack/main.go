@@ -20,6 +20,7 @@ func main() {
 
 	var (
 		outputFilename = flag.String("output", "", "output filename (default: <input-file>.png)")
+		all            = flag.Bool("all", false, "unpack all mipmaps (default: false)")
 	)
 	flag.Parse()
 
@@ -44,16 +45,35 @@ func main() {
 		*outputFilename = strings.TrimSuffix(flag.Arg(0), ".paa") + ".png"
 	}
 
-	rgba, err := paaImg.Mipmaps[0].Image(in)
+	if *all {
+		for _, mipmap := range paaImg.Mipmaps {
+			mipmapFilename := fmt.Sprintf("%s_(%dx%d).png", strings.TrimSuffix(*outputFilename, ".png"), mipmap.Width, mipmap.Height)
+			err = writeMipmap(in, mipmap, mipmapFilename)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				os.Exit(1)
+			}
+			fmt.Println("Wrote", mipmapFilename)
+		}
+	} else {
+		err = writeMipmap(in, paaImg.Mipmaps[0], *outputFilename)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		fmt.Println("Wrote", *outputFilename)
+	}
+}
+
+func writeMipmap(in *os.File, mipmap paa.Mipmap, outputFilename string) error {
+	rgba, err := mipmap.Image(in)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error: failed to decode mipmap image:", err)
-		os.Exit(1)
+		return fmt.Errorf("error: failed to decode mipmap image: %w", err)
 	}
 
-	sink, err := os.Create(*outputFilename)
+	sink, err := os.Create(outputFilename)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error: failed to open output file:", err)
-		os.Exit(1)
+		return fmt.Errorf("error: failed to open output file: %w", err)
 	}
 	defer func() {
 		if err := sink.Close(); err != nil {
@@ -63,9 +83,8 @@ func main() {
 
 	err = png.Encode(sink, rgba)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "error: failed to encode output png:", err)
-		os.Exit(1)
+		return fmt.Errorf("error: failed to encode output png: %w", err)
 	}
 
-	fmt.Println("Converted", flag.Arg(0), "to", *outputFilename)
+	return nil
 }
