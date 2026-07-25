@@ -21,6 +21,10 @@ type TaggAVGC struct {
 	Alpha uint8
 }
 
+func (t TaggAVGC) String() string {
+	return fmt.Sprintf("R=%d, G=%d, B=%d, A=%d <#%2X%2X%2X%2X>", t.Red, t.Green, t.Blue, t.Alpha, t.Red, t.Green, t.Blue, t.Alpha)
+}
+
 type TaggMAXC struct {
 	Data [4]uint8
 }

@@ -62,7 +62,7 @@ func (m *Mipmap) Image(src io.ReadSeeker) (*image.NRGBA, error) {
 	case Type_DXT5:
 		rgbaBytes, err = dxt.DecodeDXT5(data, uint(m.Width), uint(m.Height))
 	default:
-		return nil, fmt.Errorf("error: unsupported mipmap type: %#x", TypeOfPaXStrings[m.Type])
+		return nil, fmt.Errorf("error: unsupported mipmap type: %s", m.Type)
 	}
 	if err != nil {
 		return nil, err

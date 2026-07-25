@@ -30,6 +30,28 @@ $ paa-unpack testdata/test-pattern.paa
 Converted testdata/test-pattern.paa to testdata/test-pattern.png
 ```
 
+### paa-inspect
+
+Dump PAA information.
+
+```bash
+$ paa-inspect -h
+usage: paa-inspect <input-file>
+
+$ paa-inspect testdata/test-pattern.paa
+Type: DXT1
+AVGC: R=182, G=170, B=169, A=255 <#B6AAA9FF>
+
+[Mipmaps]
+  0: 512x256, size=639, compressed=true
+  1: 256x128, size=373, compressed=true
+  2: 128x64, size=4096, compressed=false
+  3: 64x32, size=1024, compressed=false
+  4: 32x16, size=256, compressed=false
+  5: 16x8, size=64, compressed=false
+  6: 8x4, size=16, compressed=false
+```
+
 # References
 
 https://community.bistudio.com/wiki/PAA_File_Format

@@ -15,6 +15,10 @@ const (
 	Type_Gray  TypeOfPaX = 0x8080
 )
 
+func (t TypeOfPaX) String() string {
+	return TypeOfPaXStrings[t]
+}
+
 var TypeOfPaXStrings = map[TypeOfPaX]string{
 	Type_OFP:   "OFP",
 	Type_DXT1:  "DXT1",

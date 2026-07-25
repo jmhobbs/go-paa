@@ -10,6 +10,16 @@ before:
 builds:
   - main: ./cmd/paa-unpack
     binary: paa-unpack
+    id: paa-unpack
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+  - main: ./cmd/paa-inspect
+    binary: paa-inspect
+    id: paa-inspect
     env:
       - CGO_ENABLED=0
     goos:
