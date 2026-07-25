@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"image"
 	"io"
+	"os"
+
+	"github.com/jmhobbs/go-paa/formats"
 
 	"github.com/anchore/go-lzo"
 	"github.com/mauserzjeh/dxt"
@@ -61,6 +64,12 @@ func (m *Mipmap) Image(src io.ReadSeeker) (*image.NRGBA, error) {
 		rgbaBytes, err = dxt.DecodeDXT3(data, uint(m.Width), uint(m.Height))
 	case Type_DXT5:
 		rgbaBytes, err = dxt.DecodeDXT5(data, uint(m.Width), uint(m.Height))
+	case Type_RGBA4:
+		fmt.Fprintln(os.Stderr, "warning: RGBA4 is not fully supported and may produce incorrect results")
+		rgbaBytes, err = formats.DecodeRGBA4(data, uint(m.Width), uint(m.Height))
+	case Type_RGBA5:
+		fmt.Fprintln(os.Stderr, "warning: RGBA5 is not fully supported and may produce incorrect results")
+		rgbaBytes, err = formats.DecodeRGBA5(data, uint(m.Width), uint(m.Height))
 	default:
 		return nil, fmt.Errorf("error: unsupported mipmap type: %s", m.Type)
 	}
