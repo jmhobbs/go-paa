@@ -139,7 +139,7 @@ func Test_Decode_DX1_TestFile(t *testing.T) {
 		img.OFFS.Offsets,
 	)
 
-	require.Equal(t, 8, len(img.Mipmaps))
+	require.Equal(t, 7, len(img.Mipmaps))
 	assert.True(t, img.Mipmaps[0].Compressed)
 	assert.Equal(t, 512, int(img.Mipmaps[0].Width))
 	assert.Equal(t, 256, int(img.Mipmaps[0].Height))
@@ -167,11 +167,6 @@ func Test_Decode_DX1_TestFile(t *testing.T) {
 	assert.False(t, img.Mipmaps[6].Compressed)
 	assert.Equal(t, 8, int(img.Mipmaps[6].Width))
 	assert.Equal(t, 4, int(img.Mipmaps[6].Height))
-
-	// Why is this one 0x0?
-	assert.False(t, img.Mipmaps[7].Compressed)
-	assert.Equal(t, 0, int(img.Mipmaps[7].Width))
-	assert.Equal(t, 0, int(img.Mipmaps[7].Height))
 
 	t.Logf("size: %d, offset: %d", img.Mipmaps[0].Size, img.Mipmaps[0].Offset)
 

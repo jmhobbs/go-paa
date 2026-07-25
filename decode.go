@@ -96,6 +96,11 @@ func Decode(in io.ReadSeeker) (*PAA, error) {
 			return nil, fmt.Errorf("error: paletted images not supported (yet)")
 		}
 
+		if mmHeader.Width == 0 && mmHeader.Height == 0 {
+			// last, dummy mipmap
+			break
+		}
+
 		// size is a 24 bit unsigned
 		mmSizeBytes := make([]uint8, 3)
 		_, err = in.Read(mmSizeBytes)
