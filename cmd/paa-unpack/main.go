@@ -48,7 +48,7 @@ func main() {
 	if *all {
 		for _, mipmap := range paaImg.Mipmaps {
 			mipmapFilename := fmt.Sprintf("%s_(%dx%d).png", strings.TrimSuffix(*outputFilename, ".png"), mipmap.Width, mipmap.Height)
-			err = writeMipmap(in, mipmap, mipmapFilename)
+			err = writeMipmap(in, paaImg.SWIZ, mipmap, mipmapFilename)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err.Error())
 				os.Exit(1)
@@ -56,7 +56,7 @@ func main() {
 			fmt.Println("Wrote", mipmapFilename)
 		}
 	} else {
-		err = writeMipmap(in, paaImg.Mipmaps[0], *outputFilename)
+		err = writeMipmap(in, paaImg.SWIZ, paaImg.Mipmaps[0], *outputFilename)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
@@ -65,10 +65,14 @@ func main() {
 	}
 }
 
-func writeMipmap(in *os.File, mipmap paa.Mipmap, outputFilename string) error {
+func writeMipmap(in *os.File, swiz *paa.TaggSWIZ, mipmap paa.Mipmap, outputFilename string) error {
 	rgba, err := mipmap.Image(in)
 	if err != nil {
 		return fmt.Errorf("error: failed to decode mipmap image: %w", err)
+	}
+
+	if swiz != nil {
+		rgba = swiz.Unswizzle(rgba)
 	}
 
 	sink, err := os.Create(outputFilename)

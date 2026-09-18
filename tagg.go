@@ -260,3 +260,48 @@ func DecodeTaggSWIZ(in io.Reader) (*TaggSWIZ, error) {
 	err = binary.Read(in, binary.LittleEndian, &swiz)
 	return &swiz, err
 }
+
+func nrgbaOffset(c Channel) int {
+	switch c {
+	case Red:
+		return 0
+	case Green:
+		return 1
+	case Blue:
+		return 2
+	case Alpha:
+		return 3
+	}
+	return -1
+}
+
+func (t TaggSWIZ) Unswizzle(img *image.NRGBA) *image.NRGBA {
+	out := image.NewNRGBA(img.Rect)
+
+	descriptors := [4]SwizzleChannel{
+		Alpha: t.AlphaChannel(),
+		Red:   t.RedChannel(),
+		Green: t.GreenChannel(),
+		Blue:  t.BlueChannel(),
+	}
+
+	for i := 0; i+4 <= len(img.Pix); i += 4 {
+		src := img.Pix[i : i+4 : i+4]
+		dst := out.Pix[i : i+4 : i+4]
+
+		for source, descriptor := range descriptors {
+			var value uint8
+			if descriptor.ForceFF {
+				value = 0xff
+			} else {
+				value = src[nrgbaOffset(descriptor.Destination)]
+				if descriptor.Negated {
+					value = 0xff - value
+				}
+			}
+			dst[nrgbaOffset(Channel(source))] = value
+		}
+	}
+
+	return out
+}

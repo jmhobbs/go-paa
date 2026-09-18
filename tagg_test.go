@@ -2,6 +2,7 @@ package paa_test
 
 import (
 	"bytes"
+	"image"
 	"io"
 	"testing"
 
@@ -214,4 +215,50 @@ func Test_SwizzleChannel_ForceFF(t *testing.T) {
 	channel := paa.DecodeSwizzleChannel(0x0d)
 	assert.True(t, channel.ForceFF)
 	assert.Equal(t, "forced to 0xff", channel.String())
+}
+
+func Test_TaggSWIZ_Unswizzle(t *testing.T) {
+	// Alpha and Red are swapped and negated,
+	// Green and Blue untouched
+	swiz := paa.TaggSWIZ{Alpha: 0x05, Red: 0x04, Green: 0x02, Blue: 0x03}
+
+	src := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	src.Pix = []byte{10, 20, 30, 200}
+
+	out := swiz.Unswizzle(src)
+
+	require.Equal(t, src.Rect, out.Rect)
+	assert.Equal(
+		t,
+		[]byte{
+			0xff - 200, // Red = negated stored Alpha
+			20,         // Green = stored Green, unchanged
+			30,         // Blue = stored Blue, unchanged
+			0xff - 10,  // Alpha = negated stored Red
+		},
+		out.Pix,
+	)
+}
+
+func Test_TaggSWIZ_Unswizzle_ForceFF(t *testing.T) {
+	// A ForceFF channel is always 0xff, regardless of what is stored.
+	swiz := paa.TaggSWIZ{Alpha: 0x08, Red: 0x01, Green: 0x02, Blue: 0x03}
+
+	src := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	src.Pix = []byte{10, 20, 30, 200}
+
+	out := swiz.Unswizzle(src)
+
+	assert.Equal(t, []byte{10, 20, 30, 0xff}, out.Pix)
+}
+
+func Test_TaggSWIZ_Unswizzle_Unchanged(t *testing.T) {
+	swiz := paa.TaggSWIZ{Alpha: 0x00, Red: 0x01, Green: 0x02, Blue: 0x03}
+
+	src := image.NewNRGBA(image.Rect(0, 0, 1, 1))
+	src.Pix = []byte{10, 20, 30, 200}
+
+	out := swiz.Unswizzle(src)
+
+	assert.Equal(t, src.Pix, out.Pix)
 }
