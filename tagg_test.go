@@ -76,6 +76,7 @@ func Test_DecodeTagg_LengthReadError(t *testing.T) {
 		"AVGC": func(r io.Reader) (any, error) { return paa.DecodeTaggAVGC(r) },
 		"MAXC": func(r io.Reader) (any, error) { return paa.DecodeTaggMAXC(r) },
 		"OFFS": func(r io.Reader) (any, error) { return paa.DecodeTaggOFFS(r) },
+		"SWIZ": func(r io.Reader) (any, error) { return paa.DecodeTaggSWIZ(r) },
 	}
 
 	for name, decode := range decoders {
@@ -95,6 +96,7 @@ func Test_DecodeTagg_LengthMismatch(t *testing.T) {
 		{"AVGC", func(r io.Reader) (any, error) { return paa.DecodeTaggAVGC(r) }},
 		{"MAXC", func(r io.Reader) (any, error) { return paa.DecodeTaggMAXC(r) }},
 		{"OFFS", func(r io.Reader) (any, error) { return paa.DecodeTaggOFFS(r) }},
+		{"SWIZ", func(r io.Reader) (any, error) { return paa.DecodeTaggSWIZ(r) }},
 	}
 
 	for _, c := range cases {
@@ -166,4 +168,50 @@ func Test_DecodeTaggOFFS(t *testing.T) {
 	for i := range 16 {
 		assert.Equal(t, uint32(i+1), offs.Offsets[i])
 	}
+}
+
+func Test_EncodeTaggSWIZ(t *testing.T) {
+	var buf bytes.Buffer
+	err := paa.TaggSWIZ{Alpha: 0x05, Red: 0x04, Green: 0x02, Blue: 0x03}.Write(&buf)
+	require.NoError(t, err)
+	assert.Equal(
+		t,
+		[]byte{
+			0x5a, 0x49, 0x57, 0x53, // header
+			0x04, 0x00, 0x00, 0x00, // length
+			0x05, 0x04, 0x02, 0x03, // data
+		},
+		buf.Bytes(),
+	)
+}
+
+func Test_DecodeTaggSWIZ(t *testing.T) {
+	// alpha and red are swapped and negated, green and blue are stored unchanged.
+	src := bytes.NewReader([]byte{
+		0x04, 0x00, 0x00, 0x00, // Length: 4
+		0x05, // Alpha
+		0x04, // Red
+		0x02, // Green
+		0x03, // Blue
+	})
+
+	swiz, err := paa.DecodeTaggSWIZ(src)
+	require.NoError(t, err)
+	require.NotNil(t, swiz)
+	assert.Equal(t, uint8(0x05), swiz.Alpha)
+	assert.Equal(t, uint8(0x04), swiz.Red)
+	assert.Equal(t, uint8(0x02), swiz.Green)
+	assert.Equal(t, uint8(0x03), swiz.Blue)
+
+	assert.Equal(t, paa.SwizzleChannel{Destination: paa.Red, Negated: true}, swiz.AlphaChannel())
+	assert.Equal(t, paa.SwizzleChannel{Destination: paa.Alpha, Negated: true}, swiz.RedChannel())
+	assert.Equal(t, paa.SwizzleChannel{Destination: paa.Green, Negated: false}, swiz.GreenChannel())
+	assert.Equal(t, paa.SwizzleChannel{Destination: paa.Blue, Negated: false}, swiz.BlueChannel())
+}
+
+func Test_SwizzleChannel_ForceFF(t *testing.T) {
+	// bit 3 set forces the channel's data to 0xff, regardless of the other bits.
+	channel := paa.DecodeSwizzleChannel(0x0d)
+	assert.True(t, channel.ForceFF)
+	assert.Equal(t, "forced to 0xff", channel.String())
 }

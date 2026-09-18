@@ -11,6 +11,7 @@ type PAA struct {
 	AVGC    *TaggAVGC
 	MAXC    *TaggMAXC
 	OFFS    *TaggOFFS
+	SWIZ    *TaggSWIZ
 	Mipmaps []Mipmap
 }
 
@@ -145,6 +146,8 @@ func readAndDecodeTagg(img *PAA, in io.Reader) error {
 		img.MAXC, err = DecodeTaggMAXC(in)
 	case Tagg_OFFS:
 		img.OFFS, err = DecodeTaggOFFS(in)
+	case Tagg_SWIZ:
+		img.SWIZ, err = DecodeTaggSWIZ(in)
 	default:
 		return fmt.Errorf("unknown TAGG: %#x", ulong)
 	}

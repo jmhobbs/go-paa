@@ -41,6 +41,9 @@ func main() {
 	if paaImg.AVGC != nil {
 		fmt.Printf("AVGC: %s\n", paaImg.AVGC)
 	}
+	if paaImg.SWIZ != nil {
+		fmt.Printf("SWIZ: %s\n", paaImg.SWIZ)
+	}
 	fmt.Println("")
 	fmt.Println("[Mipmaps]")
 	for i, m := range paaImg.Mipmaps {

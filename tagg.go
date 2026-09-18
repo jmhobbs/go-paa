@@ -15,6 +15,7 @@ const (
 	Tagg_AVGC uint32 = 0x41564743
 	Tagg_MAXC uint32 = 0x4d415843
 	Tagg_OFFS uint32 = 0x4f464653
+	Tagg_SWIZ uint32 = 0x5357495a
 )
 
 /////////////////// AVGC
@@ -162,4 +163,100 @@ func DecodeTaggOFFS(in io.Reader) (*TaggOFFS, error) {
 	var offs TaggOFFS
 	err = binary.Read(in, binary.LittleEndian, &offs)
 	return &offs, err
+}
+
+/////////////////// SWIZ
+
+type Channel uint8
+
+const (
+	Alpha Channel = 0
+	Red   Channel = 1
+	Green Channel = 2
+	Blue  Channel = 3
+)
+
+func (c Channel) String() string {
+	switch c {
+	case Alpha:
+		return "Alpha"
+	case Red:
+		return "Red"
+	case Green:
+		return "Green"
+	case Blue:
+		return "Blue"
+	default:
+		return fmt.Sprintf("Unknown(%d)", uint8(c))
+	}
+}
+
+type SwizzleChannel struct {
+	Destination Channel
+	Negated     bool
+	ForceFF     bool
+}
+
+func DecodeSwizzleChannel(b uint8) SwizzleChannel {
+	return SwizzleChannel{
+		Destination: Channel(b & 0x03),
+		Negated:     b&0x04 != 0,
+		ForceFF:     b&0x08 != 0,
+	}
+}
+
+func (c SwizzleChannel) String() string {
+	if c.ForceFF {
+		return "forced to 0xff"
+	}
+	if c.Negated {
+		return fmt.Sprintf("negated, stored in %s", c.Destination)
+	}
+	return fmt.Sprintf("stored in %s", c.Destination)
+}
+
+type TaggSWIZ struct {
+	Alpha uint8
+	Red   uint8
+	Green uint8
+	Blue  uint8
+}
+
+func (t TaggSWIZ) AlphaChannel() SwizzleChannel { return DecodeSwizzleChannel(t.Alpha) }
+func (t TaggSWIZ) RedChannel() SwizzleChannel   { return DecodeSwizzleChannel(t.Red) }
+func (t TaggSWIZ) GreenChannel() SwizzleChannel { return DecodeSwizzleChannel(t.Green) }
+func (t TaggSWIZ) BlueChannel() SwizzleChannel  { return DecodeSwizzleChannel(t.Blue) }
+
+func (t TaggSWIZ) String() string {
+	return fmt.Sprintf(
+		"A=%s, R=%s, G=%s, B=%s",
+		t.AlphaChannel(), t.RedChannel(), t.GreenChannel(), t.BlueChannel(),
+	)
+}
+
+func (t TaggSWIZ) Write(out io.Writer) error {
+	err := binary.Write(out, binary.LittleEndian, Tagg_SWIZ)
+	if err != nil {
+		return err
+	}
+	err = binary.Write(out, binary.LittleEndian, uint32(4))
+	if err != nil {
+		return err
+	}
+	return binary.Write(out, binary.LittleEndian, t)
+}
+
+func DecodeTaggSWIZ(in io.Reader) (*TaggSWIZ, error) {
+	var length uint32
+	err := binary.Read(in, binary.LittleEndian, &length)
+	if err != nil {
+		return nil, err
+	}
+	if length != 4 {
+		return nil, fmt.Errorf("error: unexpected length for SWIZ tag: %d", length)
+	}
+
+	var swiz TaggSWIZ
+	err = binary.Read(in, binary.LittleEndian, &swiz)
+	return &swiz, err
 }
