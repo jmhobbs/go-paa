@@ -6,6 +6,8 @@ github.com/jmhobbs/dxt v0.0.0-20260724020625-44cbc050dc31 h1:vb6agoeErcP9WN9UvW6
 github.com/jmhobbs/dxt v0.0.0-20260724020625-44cbc050dc31/go.mod h1:nUJG0zFm7jyZlkROIzlgN9ee1KQyFPFC9mv1Prw5V/s=
 github.com/jmhobbs/go-psnr v0.0.1 h1:buHPxomzxoHFxeOigjPsCpJ6WNuSIxjkF+Zjn7LGRfk=
 github.com/jmhobbs/go-psnr v0.0.1/go.mod h1:LAXbJqWtZ3XE0QHLUD5b1ZlGvVRFPaxbiTntbc1o/eY=
+github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 h1:zYyBkD/k9seD2A7fsi6Oo2LfFZAehjjQMERAvZLEDnQ=
+github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646/go.mod h1:jpp1/29i3P1S/RLdc7JQKbRpFeM1dOBd8T9ki5s+AY8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
