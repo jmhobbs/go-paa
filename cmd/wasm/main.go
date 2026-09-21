@@ -38,6 +38,10 @@ func paaToPng(_ js.Value, args []js.Value) (result any) {
 		return errorResult(fmt.Sprintf("failed to decode mipmap image: %v", err))
 	}
 
+	if paaFile.SWIZ != nil {
+		img = paaFile.SWIZ.Unswizzle(img)
+	}
+
 	var buf bytes.Buffer
 
 	err = png.Encode(&buf, img)
