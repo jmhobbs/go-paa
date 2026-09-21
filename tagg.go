@@ -105,6 +105,10 @@ type TaggMAXC struct {
 	Data [4]uint8
 }
 
+func NewTaggMAXC() TaggMAXC {
+	return TaggMAXC{Data: [4]uint8{0xFF, 0xFF, 0xFF, 0xFF}}
+}
+
 func (t TaggMAXC) Write(out io.Writer) error {
 	err := binary.Write(out, binary.LittleEndian, Tagg_MAXC)
 	if err != nil {

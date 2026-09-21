@@ -8,6 +8,7 @@ require (
 	github.com/anchore/go-lzo v0.1.1
 	github.com/jmhobbs/go-psnr v0.0.1
 	github.com/mauserzjeh/dxt v1.0.0
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/stretchr/testify v1.11.1
 )
 
