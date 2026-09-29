@@ -16,6 +16,7 @@ const (
 	Tagg_MAXC uint32 = 0x4d415843
 	Tagg_OFFS uint32 = 0x4f464653
 	Tagg_SWIZ uint32 = 0x5357495a
+	Tagg_FLAG uint32 = 0x464c4147
 )
 
 /////////////////// AVGC
@@ -304,4 +305,33 @@ func (t TaggSWIZ) Unswizzle(img *image.NRGBA) *image.NRGBA {
 	}
 
 	return out
+}
+
+type TaggFLAG struct {
+	Transparency uint32
+}
+
+func (f *TaggFLAG) String() string {
+	switch f.Transparency {
+	case 1:
+		return "alpha channel interpolated"
+	case 2:
+		return "alpha channel disabled"
+	}
+	return fmt.Sprintf("undefined behavior %d", f.Transparency)
+}
+
+func DecodeTaggFLAG(in io.Reader) (*TaggFLAG, error) {
+	var length uint32
+	err := binary.Read(in, binary.LittleEndian, &length)
+	if err != nil {
+		return nil, err
+	}
+	if length != 4 {
+		return nil, fmt.Errorf("error: unexpected length for FLAG tag: %d", length)
+	}
+
+	var flag TaggFLAG
+	err = binary.Read(in, binary.LittleEndian, &flag)
+	return &flag, err
 }

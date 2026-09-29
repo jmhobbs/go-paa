@@ -262,3 +262,15 @@ func Test_TaggSWIZ_Unswizzle_Unchanged(t *testing.T) {
 
 	assert.Equal(t, src.Pix, out.Pix)
 }
+
+func Test_DecodeTaggFLAG(t *testing.T) {
+	src := bytes.NewReader([]byte{
+		0x04, 0x00, 0x00, 0x00, // Length: 4
+		0x01, 0x00, 0x00, 0x00,
+	})
+
+	flag, err := paa.DecodeTaggFLAG(src)
+	require.NoError(t, err)
+	require.NotNil(t, flag)
+	assert.Equal(t, uint32(1), flag.Transparency)
+}
