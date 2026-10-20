@@ -113,7 +113,7 @@ func Test_DecodeTagg_LengthMismatch(t *testing.T) {
 
 func Test_EncodeTaggOFFS(t *testing.T) {
 	var buf bytes.Buffer
-	var offsets [16]uint32 = [16]uint32{1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	var offsets = [16]uint32{1, 2, 3, 4, 5, 6, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	err := paa.TaggOFFS{Offsets: offsets}.Write(&buf)
 	require.NoError(t, err)
 	assert.Equal(
